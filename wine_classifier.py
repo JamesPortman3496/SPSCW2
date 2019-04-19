@@ -12,6 +12,7 @@ from __future__ import print_function
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 from utilities import load_data, print_features, print_predictions
 
 # you may use these colours to produce the scatter plots
@@ -68,9 +69,47 @@ def most_common_class(labels, train_set, train_labels, test_set, k):
         return knn(train_set, train_labels, test_set, k-1)
 
 def alternative_classifier(train_set, train_labels, test_set, **kwargs):
-    # write your code here and make sure you return the predictions at the end of
-    # the function
-    return []
+    train_set_1 = []
+    train_set_2 = []
+    train_set_3 = []
+    numOf = [0,0,0]
+    for x in range (0, len(train_set)):
+        if(train_labels[x] == 1):
+            train_set_1.append(train_set[x])
+            numOf[0] += 1
+        if(train_labels[x] == 2):
+            train_set_2.append(train_set[x])
+            numOf[1] += 1
+        if(train_labels[x] == 3):
+            train_set_3.append(train_set[x])
+            numOf[2] += 1
+
+    matrix1 = np.matrix(train_set_1)
+    matrix2 = np.matrix(train_set_2)
+    matrix3 = np.matrix(train_set_3)
+    matrixMean = np.zeros([13, 3])
+    matrixSD = np.zeros([13, 3])
+
+    for x in range (0, 13):
+        matrixMean[x, 0] = np.mean(matrix1[:,x])
+        matrixMean[x, 1] = np.mean(matrix2[:,x])
+        matrixMean[x, 2] = np.mean(matrix3[:,x])
+        matrixSD[x, 0] = np.std(matrix1[:,x])
+        matrixSD[x, 1] = np.std(matrix2[:,x])
+        matrixSD[x, 2] = np.std(matrix3[:,x])
+
+
+    classify = []
+    for x in test_set:
+        values = [0,0,0]
+        for i in range (0, 3):
+            omega = numOf[i]/len(train_set)
+            for j in range (0, 13):
+                omega *= norm.pdf(x[j],matrixMean[j,i], matrixSD[j,i])
+            values[i] = omega
+        classify.append(np.argsort(values)[2]+1)
+
+    return classify
 
 
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):

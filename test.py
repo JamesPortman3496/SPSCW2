@@ -24,9 +24,6 @@ def calculate_confusion_matrix(gt_labels, pred_labels):
 
 
 train_set, train_labels, test_set, test_labels = load_data()
-
-for k in range (1,8):
-    print(k)
-    predicted=knn(train_set, train_labels, test_set, k)
-    confusion=calculate_confusion_matrix(test_labels, predicted)
-    print(confusion)
+predicted=alternative_classifier(train_set, train_labels, test_set)
+confusion=calculate_confusion_matrix(test_labels, predicted)
+print(confusion)
