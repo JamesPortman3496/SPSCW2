@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 from utilities import load_data, print_features, print_predictions
+from sklearn.decomposition import PCA
 
 # you may use these colours to produce the scatter plots
 CLASS_1_C = r'#3366ff'
@@ -115,14 +116,53 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of
     # the function
-    return []
+    if (k<1) or (k>7):
+        return None
+
+    reduced_train_set=train_set[:,[6,9,11]] # Only change is to have 3 cols here
+    reduced_test_set=test_set[:,[6,9,11]]
+    dist = lambda x, y: np.sqrt(np.sum((x-y)**2)) # This is already generalised for n dimensions
+    obs_dist = lambda x : [dist(x, obs) for obs in reduced_train_set]
+
+    test_dist=[]
+    for t in reduced_test_set:
+        test_dist.append(obs_dist(t))
+
+    k_nearest=[np.argsort(test_dist[i])[:k].astype(np.int) for i in range (0,len(test_set))]
+
+    classified=[]
+    for i in range (0,len(test_set)):
+        neighbours=k_nearest[i] # neighbours
+        labels=train_labels[neighbours]
+        classified.append(most_common_class(labels, train_set, train_labels, test_set, k))
+
+    return classified
 
 
 def knn_pca(train_set, train_labels, test_set, k, n_components=2, **kwargs):
     # write your code here and make sure you return the predictions at the end of
     # the function
-    return []
+    pca=PCA(n_components=n_components)
+    pca=pca.fit(train_set)
+    transformed_train_set=pca.transform(train_set)
+    transformed_test_set=pca.transform(test_set)
 
+    dist = lambda x, y: np.sqrt(np.sum((x-y)**2)) # This is already generalised for n dimensions
+    obs_dist = lambda x : [dist(x, obs) for obs in transformed_train_set]
+
+    test_dist=[]
+    for t in transformed_test_set:
+        test_dist.append(obs_dist(t))
+
+    k_nearest=[np.argsort(test_dist[i])[:k].astype(np.int) for i in range (0,len(test_set))]
+
+    classified=[]
+    for i in range (0,len(test_set)):
+        neighbours=k_nearest[i] # neighbours
+        labels=train_labels[neighbours]
+        classified.append(most_common_class(labels, train_set, train_labels, test_set, k))
+
+    return classified
 
 def parse_args():
     parser = argparse.ArgumentParser()

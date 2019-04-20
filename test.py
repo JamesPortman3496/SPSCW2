@@ -22,8 +22,55 @@ def calculate_confusion_matrix(gt_labels, pred_labels):
             cm[i, j] = samples1/samples2
     return cm
 
+def confusion_matrix_alt_classifier():
+    train_set, train_labels, test_set, test_labels = load_data()
+    predicted=alternative_classifier(train_set, train_labels, test_set)
+    confusion=calculate_confusion_matrix(test_labels, predicted)
+    print(confusion)
 
-train_set, train_labels, test_set, test_labels = load_data()
-predicted=alternative_classifier(train_set, train_labels, test_set)
-confusion=calculate_confusion_matrix(test_labels, predicted)
-print(confusion)
+def confusion_matrix_knn():
+    train_set, train_labels, test_set, test_labels = load_data()
+    for k in range (1,8):
+        predicted=knn(train_set, train_labels, test_set,k)
+        confusion=calculate_confusion_matrix(test_labels, predicted)
+        print(confusion)
+
+def confusion_matrix_knn_3d():
+    train_set, train_labels, test_set, test_labels = load_data()
+    for k in range (1,8):
+        predicted=knn_three_features(train_set, train_labels, test_set, k)
+        confusion=calculate_confusion_matrix(test_labels, predicted)
+        print("k={}".format(k))
+        print(confusion)
+
+def confusion_matrix_knn_pca():
+    train_set, train_labels, test_set, test_labels = load_data()
+    for k in range (1,8):
+        predicted=knn_pca(train_set, train_labels, test_set, k)
+        confusion=calculate_confusion_matrix(test_labels, predicted)
+        print("k={}".format(k))
+        print(confusion)
+
+def pca_plot():
+    train_set, train_labels, test_set, test_labels = load_data()
+    pca=PCA(n_components=2)
+    pca=pca.fit(train_set)
+    transformed_train_set=pca.transform(train_set)
+    transformed_test_set=pca.transform(test_set)
+
+    CLASS_1_C = r'#3366ff'
+    CLASS_2_C = r'#cc3300'
+    CLASS_3_C = r'#ffc34d'
+    colours=[CLASS_1_C,CLASS_2_C,CLASS_3_C]
+
+    trainColours=[]; testColours=[]
+    for label in train_labels:
+        trainColours.append(colours[label-1])
+    for label in test_labels:
+        testColours.append(colours[label-1])
+
+    plt.scatter(transformed_train_set[:,0],transformed_train_set[:,1],c=trainColours)
+    plt.title("PCA Transformed Training Set")
+    plt.savefig("pca",bbox_inches='tight',dpi=100)
+
+pca_plot()
