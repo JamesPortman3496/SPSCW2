@@ -10,9 +10,9 @@ from wine_classifier import *
 from sklearn.metrics import confusion_matrix
 from mpl_toolkits.mplot3d import Axes3D
 
-class_1_colour = r'#3366ff'
-class_2_colour = r'#cc3300'
-class_3_colour = r'#ffc34d'
+class_1_colour = r'#3366ff' # Blue
+class_2_colour = r'#cc3300' # Red
+class_3_colour = r'#ffc34d' # Yellow
 
 class_colours = [class_1_colour, class_2_colour, class_3_colour]
 
@@ -125,6 +125,4 @@ def third_feature_correlation():
             corr=corr/(1-cc[0,1]**2)
             print("i={}, corr={}".format(i,np.sqrt(corr)))
 
-print("KNN")
-choose_two()
-third_feature_correlation()
+confusion_matrix_knn_pca()

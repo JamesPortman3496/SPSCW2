@@ -24,16 +24,19 @@ CLASS_3_C = r'#ffc34d'
 MODES = ['feature_sel', 'knn', 'alt', 'knn_3d', 'knn_pca']
 
 # standardises an array around its mean
-def standardise(arr):
-    mean=np.mean(arr)
-    sd=np.std(arr)
+def standardise(arr, wrt=None):
+    if (wrt is None):
+        mean=np.mean(arr)
+        sd=np.std(arr)
+    else:
+        mean=np.mean(wrt)
+        sd=np.std(wrt)
     return np.divide((arr-mean),sd)
 
 def feature_selection(train_set, train_labels, **kwargs):
     # write your code here and make sure you return the features at the end of
     # the function
     return [6,9]
-
 
 def knn(train_set, train_labels, test_set, k, **kwargs):
     # write your code here and make sure you return the predictions at the end of
@@ -47,7 +50,7 @@ def knn(train_set, train_labels, test_set, k, **kwargs):
     standardised_reduced_train_set=np.array([standardise(reduced_train_set[:,0]),standardise(reduced_train_set[:,1])]).T
 
     reduced_test_set=test_set[:,features]
-    standardised_reduced_test_set=np.array([standardise(reduced_test_set[:,0]),standardise(reduced_test_set[:,1])]).T
+    standardised_reduced_test_set=np.array([standardise(reduced_test_set[:,0],wrt=reduced_train_set[:,0]),standardise(reduced_test_set[:,1],wrt=reduced_train_set[:,1])]).T
 
     dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
     obs_dist = lambda x : [dist(x, obs) for obs in standardised_reduced_train_set]
@@ -78,7 +81,7 @@ def most_common_class(labels):
     if (class_occurences[2]>class_occurences[0]) and (class_occurences[2]>class_occurences[1]):
         return 3
     else:
-        return most_common_class(labels[:len(labels)-1])
+        return most_common_class(labels[:len(labels)-1]) # Remove furthest neighbour
 
 def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     features=feature_selection(train_set,train_labels)
@@ -89,12 +92,13 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
     numOf = [0,0,0]
 
     means=train_set[:,features].mean(axis=0)
+    sd=train_set[:,features].std(axis=0)
 
     reduced_train_set=train_set[:,features]
     standardised_reduced_train_set=np.array([standardise(reduced_train_set[:,0]),standardise(reduced_train_set[:,1])]).T
 
     reduced_test_set=test_set[:,features]
-    standardised_reduced_test_set=np.array([standardise(reduced_test_set[:,0]),standardise(reduced_test_set[:,1])]).T
+    standardised_reduced_test_set=np.array([standardise(reduced_test_set[:,0],wrt=reduced_train_set[:,0]),standardise(reduced_test_set[:,1],wrt=reduced_train_set[:,1])]).T
 
     for x in range (0, len(train_set)):
         if(train_labels[x] == 1):
@@ -123,7 +127,7 @@ def alternative_classifier(train_set, train_labels, test_set, **kwargs):
 
     classify = []
     for x in test_set:
-        x=[x[features[0]]/means[0],x[features[1]]/means[1]]
+        x=[(x[features[0]]-means[0])/sd[0],(x[features[0]]-means[0])/sd[1]]
         values = [0,0,0]
         for i in range (0, 3):
             omega = numOf[i]/len(train_set)
@@ -144,7 +148,7 @@ def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
     standardised_reduced_train_set=np.array([standardise(reduced_train_set[:,0]),standardise(reduced_train_set[:,1]),standardise(reduced_train_set[:,2])]).T
 
     reduced_test_set=test_set[:,[6,9,5]]
-    standardised_reduced_test_set=np.array([standardise(reduced_test_set[:,0]),standardise(reduced_test_set[:,1]),standardise(reduced_test_set[:,2])]).T
+    standardised_reduced_test_set=np.array([standardise(reduced_test_set[:,0],wrt=reduced_train_set[:,0]),standardise(reduced_test_set[:,1],wrt=reduced_train_set[:,1]),standardise(reduced_test_set[:,2],wrt=reduced_train_set[:,2])]).T
 
     dist = lambda x, y: np.sqrt(np.sum((x-y)**2))
     obs_dist = lambda x : [dist(x, obs) for obs in standardised_reduced_train_set]
@@ -159,7 +163,7 @@ def knn_three_features(train_set, train_labels, test_set, k, **kwargs):
     for i in range (0,len(test_set)):
         neighbours=k_nearest[i] # neighbours
         labels=train_labels[neighbours]
-        classified.append(most_common_class(labels, train_set, train_labels, np.array([test_set[i]]), k))
+        classified.append(most_common_class(labels))
 
     return classified
 
@@ -184,7 +188,7 @@ def knn_pca(train_set, train_labels, test_set, k, n_components=2, **kwargs):
     for i in range (0,len(test_set)):
         neighbours=k_nearest[i] # neighbours
         labels=train_labels[neighbours]
-        classified.append(most_common_class(labels, train_set, train_labels, np.array([test_set[i]]), k))
+        classified.append(most_common_class(labels))
 
     return classified
 
