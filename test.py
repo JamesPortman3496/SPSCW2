@@ -31,8 +31,10 @@ def calculate_confusion_matrix(gt_labels, pred_labels):
             cm[i, j] = samples1/samples2
     return cm
 
-def normalise(arr):
-    return np.divide(arr,np.mean(arr))
+def standardise(arr):
+    mean=np.mean(arr)
+    sd=np.std(arr)
+    return np.divide((arr-mean),sd)
 
 def confusion_matrix_alt_classifier():
     train_set, train_labels, test_set, test_labels = load_data()
@@ -86,7 +88,7 @@ def pca_plot():
     plt.title("PCA Transformed Training Set")
     plt.savefig("pca",bbox_inches='tight',dpi=100)
 
-# Normalises data & plots each pair of features against each other
+# standardises data & plots each pair of features against each other
 def choose_two():
     train_set, train_labels, test_set, test_labels = load_data()
 
@@ -102,28 +104,27 @@ def choose_two():
             xs=train_set[:,i]
             ys=train_set[:,j]
 
-            xsNormalised=normalise(xs)
-            ysNormalised=normalise(ys)
+            xsstandardised=standardise(xs)
+            ysstandardised=standardise(ys)
 
-            plt.scatter(xsNormalised,ysNormalised,c=colours)
+            plt.scatter(xsstandardised,ysstandardised,c=colours)
             plt.title("Features {} vs {}".format(i+1,j+1))
             plt.savefig("img/{}x{}".format(i+1,j+1),bbox_inches='tight',dpi=100)
 
 def third_feature_correlation():
     train_set, train_labels, test_set, test_labels = load_data()
 
-    n6=normalise(train_set[:,6])
-    n9=normalise(train_set[:,9])
+    n6=standardise(train_set[:,6])
+    n9=standardise(train_set[:,9])
 
     for i in range (0,13):
         if (i!=6 and i!=9):
-            cc=np.corrcoef([n6,n9,normalise(train_set[:,i])])
+            cc=np.corrcoef([n6,n9,standardise(train_set[:,i])])
 
             corr=cc[0,2]**2+cc[1,2]**2-2*cc[0,1]*cc[0,2]*cc[1,2]
             corr=corr/(1-cc[0,1]**2)
             print("i={}, corr={}".format(i,np.sqrt(corr)))
 
-confusion_matrix_knn()
-confusion_matrix_knn_3d()
-confusion_matrix_alt_classifier()
-confusion_matrix_knn_pca()
+print("KNN")
+choose_two()
+third_feature_correlation()
